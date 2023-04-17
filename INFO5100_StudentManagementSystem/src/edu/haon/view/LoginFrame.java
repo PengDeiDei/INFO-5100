@@ -65,8 +65,8 @@ public class LoginFrame extends JFrame{
                 JOptionPane.showMessageDialog(contentPanel,"Welcome, Admin: "+admin.getName()+"!");
                 // close login frame
                 this.dispose();
-                // create and move to main frame
-                new MainFrame(userType,admin);
+                // create and move to admin frame
+                new AdminFrame(admin);
                 System.out.println("Admin login successfully");
             }else{
                 // login as student

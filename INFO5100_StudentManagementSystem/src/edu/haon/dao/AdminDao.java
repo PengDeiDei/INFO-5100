@@ -50,4 +50,30 @@ public class AdminDao extends BaseDao{
         }
         return adminRs;
     }
+
+    /*
+     * @brief: method to update admin password to SQL database
+     *
+     * @ param: admin Admin Object,
+     *          new_pw String
+     *
+     * @return: result int
+     */
+    public int editPassword(Admin admin, String new_pw){
+        int result = 0;
+        String sql = "UPDATE Admins SET AdminPassword = ? WHERE AdminUsername = ?";
+
+        try {
+            PreparedStatement prepState = conn.prepareStatement(sql);
+            prepState.setString(1,new_pw);
+            prepState.setString(2,admin.getUsername());
+            result = prepState.executeUpdate();
+
+
+        } catch (SQLException sqlE){
+            sqlE.printStackTrace();
+        }
+
+        return result;
+    }
 }
