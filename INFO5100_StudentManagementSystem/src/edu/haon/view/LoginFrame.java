@@ -1,5 +1,7 @@
 package edu.haon.view;
 
+import edu.haon.dao.AdminDao;
+import edu.haon.model.Admin;
 import edu.haon.util.StringUtil;
 
 import javax.swing.*;
@@ -28,29 +30,46 @@ public class LoginFrame extends JFrame{
         /*
          * brief: ActionListener for login
          */
-        login_button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String username = user_tf.getText().toString();
-                String password = new String(password_pf.getPassword());
-                int userType = userType_cb.getSelectedIndex();
+        login_button.addActionListener(e-> {
+            String username = user_tf.getText().toString();
+            String password = new String(password_pf.getPassword());
+            int userType = userType_cb.getSelectedIndex();
 
-                if(StringUtil.isEmpty(username)){
-                    JOptionPane.showMessageDialog(contentPanel,"Username cannot be empty!");
+            if(StringUtil.isEmpty(username)){
+                JOptionPane.showMessageDialog(contentPanel,"Username cannot be empty!");
+                return;
+            }
+
+            if(StringUtil.isEmpty(password)){
+                JOptionPane.showMessageDialog(contentPanel,"Password cannot be empty!");
+                return;
+            }
+
+            // login as admin
+            Admin admin = null;
+            if(userType == 0){
+                AdminDao ad = new AdminDao();
+
+                Admin tempAdmin = new Admin();
+                tempAdmin.setUsername(username);
+                tempAdmin.setPassword(password);
+
+                admin = ad.login(tempAdmin);
+
+                if(admin == null){
+                    JOptionPane.showMessageDialog(contentPanel,"Username or password is wrong!");
                     return;
                 }
 
-                if(StringUtil.isEmpty(password)){
-                    JOptionPane.showMessageDialog(contentPanel,"Password cannot be empty!");
-                    return;
-                }
-
-                if(userType == 0){
-                    // login as admin
-
-                }else{
-                    // login as student
-                }
+                // pop message to show login successfully
+                JOptionPane.showMessageDialog(contentPanel,"Welcome, Admin: "+admin.getName()+"!");
+                // close login frame
+                this.dispose();
+                // create and move to main frame
+                new MainFrame(userType,admin);
+                System.out.println("Admin login successfully");
+            }else{
+                // login as student
             }
         });
 
@@ -58,9 +77,7 @@ public class LoginFrame extends JFrame{
          * brief: ActionListener to clear the entered username,
          * password, and reset the login type to admin.
          */
-        reset_button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        reset_button.addActionListener(e -> {
                 // clear user text field
                 user_tf.setText("");
                 // clear password field
@@ -68,7 +85,6 @@ public class LoginFrame extends JFrame{
                 // set combo box to the first item
                 userType_cb.setSelectedIndex(0);
 
-            }
         });
     }
 
