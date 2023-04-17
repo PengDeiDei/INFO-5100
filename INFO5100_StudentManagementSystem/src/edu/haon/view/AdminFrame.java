@@ -48,6 +48,12 @@ public class AdminFrame extends JFrame{
     private JTextField stu_major_tf2;
     private JScrollPane stu_list_sp;
     private JTable stu_list_tbl;
+    private JButton stu_delete_b;
+    private JButton stu_edit_b;
+    private JLabel stu_name_lb3;
+    private JLabel stu_major_lb3;
+    private JTextField stu_name_tf3;
+    private JTextField stu_major_tf3;
 
     public AdminFrame(Admin admin){
         this.admin = admin;
@@ -58,6 +64,7 @@ public class AdminFrame extends JFrame{
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
 
+    // Personal Setting Panel:
         // Change Password button
         password_b1.addActionListener(e-> {
             String curr_pw = new String(curr_password_pf.getPassword());
@@ -107,7 +114,7 @@ public class AdminFrame extends JFrame{
                 JOptionPane.showMessageDialog(contentPanel,"Unable to change your password!");
             }
 
-            ad.closeDao();
+            ad.closeDao(); // close connection
         });
 
         // Clear password button
@@ -118,6 +125,8 @@ public class AdminFrame extends JFrame{
         });
 
 
+    // Student Management Panel:
+        // Add Student Panel:
         // Add new student button
         stu_add_b.addActionListener(e->{
             String stu_name = stu_name_tf1.getText().toString();
@@ -127,19 +136,17 @@ public class AdminFrame extends JFrame{
                 JOptionPane.showMessageDialog(contentPanel, "Please enter student name.");
                 return;
             }
-
             if(StringUtil.isEmpty(stu_major)){
                 JOptionPane.showMessageDialog(contentPanel, "Please enter student major.");
                 return;
             }
 
-            String[] temp_name = stu_name.split(" ");
-            String name_sc = (temp_name[0].substring(0,2)+temp_name[1].charAt(0)).toLowerCase();
-            String stu_username = "student."+ name_sc;
-            String stu_password = name_sc.toUpperCase().charAt(0) +""+name_sc.charAt(2)+"111";
+            // generate student username and password
+            String[] stu_result = getUserAndPassword(stu_name);
 
+            // create new Student object
             Student student = new Student();
-            student.setUsername(stu_username); student.setPassword(stu_password);
+            student.setUsername(stu_result[0]); student.setPassword(stu_result[1]);
             student.setName(stu_name); student.setMajor(stu_major);
 
             StudentDao sd = new StudentDao();
@@ -147,7 +154,7 @@ public class AdminFrame extends JFrame{
 
             if(result >0){
                 JOptionPane.showMessageDialog(contentPanel, "Add new student successfully!\n" +
-                        "Username: "+stu_username+"\nPassword: "+stu_password);
+                        "Username: "+stu_result[0]+"\nPassword: "+stu_result[1]);
             }else{
                 JOptionPane.showMessageDialog(contentPanel,"Unable to add this student!");
             }
@@ -159,6 +166,7 @@ public class AdminFrame extends JFrame{
             stu_major_tf.setText("");
         });
 
+        // Student List Panel:
         // list students by searching name and major
         stu_search_b.addActionListener(e -> {
             String stu_name = stu_name_tf2.getText().toString();
@@ -168,19 +176,103 @@ public class AdminFrame extends JFrame{
             stu.setName(stu_name);
             stu.setMajor(stu_major);
 
-            StudentDao sd = new StudentDao();
-            List<Student> studentList = sd.getStudentList(stu);
+            setTable(stu);
+        });
 
-            createTable(studentList);
+        // delete student by selected row
+        stu_delete_b.addActionListener(e->{
+            int row = stu_list_tbl.getSelectedRow();
+
+            if(row == -1){
+                JOptionPane.showMessageDialog(contentPanel,"Please select the row to delete.");
+                return;
+            }
+
+            String name = stu_list_tbl.getValueAt(row,1).toString();
+
+            StudentDao sd = new StudentDao();
+            int result = sd.deleteStudent(name);
+
+            if(result >0){
+                JOptionPane.showMessageDialog(contentPanel,"Delete successfully.");
+            }else{
+                JOptionPane.showMessageDialog(contentPanel,"Unable to delete.");
+            }
+
+            // refresh table no matter the student is deleted or not
+            setTable(new Student());
+        });
+
+        // edit information of selected student
+        stu_edit_b.addActionListener(e-> {
+            int row = stu_list_tbl.getSelectedRow();
+
+            if(row == -1){
+                JOptionPane.showMessageDialog(contentPanel,"Please select the row to edit.");
+                return;
+            }
+
+            // get studentId, new name and new major
+            String stu_id = stu_list_tbl.getValueAt(row,0).toString();
+            String new_name = stu_name_tf3.getText().toString();
+            String new_major = stu_major_tf3.getText().toString();
+
+            // if both text fields are empty, pop message to ask user for inputs
+            if(StringUtil.isEmpty(new_name) && StringUtil.isEmpty(new_major)){
+                JOptionPane.showMessageDialog(contentPanel,"Please enter the information you want edit.");
+                return;
+            }
+
+            StudentDao sd = new StudentDao();
+            int result = sd.editStudent(stu_id, new_name, new_major);
+
+            if(result >0){
+                JOptionPane.showMessageDialog(contentPanel,"Edit successfully.");
+            }else{
+                JOptionPane.showMessageDialog(contentPanel,"Unable to edit.");
+            }
+
+            // refresh table no matter the student is edited or not
+            setTable(new Student());
 
             sd.closeDao();
         });
     }
 
-    private void createTable(List<Student> studentList){
+    /*
+     * @brief: method to generate username and password for new student
+     *  by taking student name
+     *
+     * @param: stu_name String
+     *
+     * @return: result String[]
+     */
+    private String[] getUserAndPassword(String stu_name){
+        String[] temp_name = stu_name.split(" ");
+        String name_sc = (temp_name[0].substring(0,2)+temp_name[1].charAt(0)).toLowerCase();
+
+        String[] result = new String[2];
+        result[0] = "student."+ name_sc;
+        result[1] = name_sc.toUpperCase().charAt(0) +""+name_sc.charAt(2)+"111";
+
+        return result;
+    }
+
+    /*
+     * @brief: set student list table by taking the input Student object
+     *  search the student name and major from the input object,
+     *  return found data stored in the list of Student objects,
+     *  create table with the returned list
+     *
+     * @param: student Student Object
+     */
+    private void setTable(Student student){
+        StudentDao sd = new StudentDao();
+        List<Student> studentList = sd.getStudentList(student);
+
         DefaultTableModel dtm = new DefaultTableModel(null, new String[]{"Student Id","Student Name","Major", "Username","Password"});
         stu_list_tbl.setModel(dtm);
-        
+
         for(Student s: studentList){
             Vector v = new Vector();
             v.add(s.getStudentId());
@@ -190,5 +282,8 @@ public class AdminFrame extends JFrame{
             v.add(s.getPassword());
             dtm.addRow(v);
         }
+
+        sd.closeDao();
     }
+
 }

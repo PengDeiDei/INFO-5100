@@ -67,7 +67,6 @@ public class LoginFrame extends JFrame{
                 this.dispose();
                 // create and move to admin frame
                 new AdminFrame(admin);
-                System.out.println("Admin login successfully");
             }else{
                 // login as student
             }

@@ -12,13 +12,13 @@ import java.util.List;
 
 public class StudentDao extends BaseDao{
     /*
-     * @brief: admin login method; taking the input Student object,
-     * execute the SQL query command to get related information
-     * from database, and return the found Student object
+     *  @brief: admin login method; taking the input Student object,
+     *  execute the SQL query command to get related information
+     *  from database, and return the found Student object
      *
-     * @param: student Student Object
+     *  @param: student Student Object
      *
-     * @return: studentRs Student, if found
+     *  @return: studentRs Student, if found
      *          null, otherwise
      */
     public Student login(Student student){
@@ -56,12 +56,12 @@ public class StudentDao extends BaseDao{
     }
 
     /*
-     * @brief: method to update student password to SQL database
+     *  @brief: method to update student password to SQL database
      *
-     * @ param: student Student Object,
+     *  @param: student Student Object,
      *          new_pw String
      *
-     * @return: result int
+     *  @return: result int
      */
     public int editPassword(Student student, String new_pw){
         int result = 0;
@@ -116,12 +116,13 @@ public class StudentDao extends BaseDao{
         return result;
     }
 
-    public int deleteStudent(Student student){
+    public int deleteStudent(String stu_name){
         int result = 0;
-        String sql = "DELETE FROM Students WHERE StudentUsername = "+student.getUsername();
+        String sql = "DELETE FROM Students WHERE StudentName = ?";
 
         try {
             PreparedStatement prepState = conn.prepareStatement(sql);
+            prepState.setString(1,stu_name);
             result = prepState.executeUpdate();
         } catch (SQLException sqlE){
             sqlE.printStackTrace();
@@ -163,5 +164,42 @@ public class StudentDao extends BaseDao{
         }
 
         return stuList;
+    }
+
+    /*
+     *  @brief: method to change student information by taking
+     *  the student id, new name, and new major; return the
+     *  integer result to indicate whether the update is successes
+     *  or not.
+     *
+     *  @param: stu_id String,
+     *          new_name String,
+     *          new_major String
+     *
+     * @return: result int
+     */
+    public int editStudent(String stu_id, String new_name, String new_major){
+        int result = 0;
+        String sql = "UPDATE Students";
+        if(!StringUtil.isEmpty(new_name)){
+            sql += " AND StudentName = '"+new_name+"'";
+        }
+
+        if(!StringUtil.isEmpty(new_major)){
+            sql += " AND StudentMajor = '"+new_major+"'";
+        }
+
+        sql += " WHERE StudentId = ?";
+
+        try {
+            sql = sql.toString().replaceFirst("AND","SET");
+            PreparedStatement prepState = conn.prepareStatement(sql);
+            prepState.setString(1,stu_id);
+            result = prepState.executeUpdate();
+
+        } catch (SQLException sqlE){
+            sqlE.printStackTrace();
+        }
+        return result;
     }
 }
