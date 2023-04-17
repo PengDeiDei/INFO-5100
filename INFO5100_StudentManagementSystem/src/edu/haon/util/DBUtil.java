@@ -43,17 +43,4 @@ public class DBUtil {
             conn.close();
         }
     }
-
-    // main method to test
-    public static void main(String[] args){
-        DBUtil myDBUtil = new DBUtil();
-
-        try{
-            myDBUtil.getConn();
-            System.out.println("Connection Successfully");
-        } catch (Exception e){
-            e.printStackTrace();
-            System.out.println("Connection failed!");
-        }
-    }
 }

@@ -1,10 +1,12 @@
 package edu.haon.dao;
 
 import edu.haon.model.Admin;
+import edu.haon.model.Student;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class AdminDao extends BaseDao{
 
@@ -43,11 +45,8 @@ public class AdminDao extends BaseDao{
         }
 
         // try closing the connection to database
-        try{
-            conn.close();
-        } catch (SQLException sqlE){
-            sqlE.printStackTrace();
-        }
+        this.closeDao();
+
         return adminRs;
     }
 
@@ -68,8 +67,6 @@ public class AdminDao extends BaseDao{
             prepState.setString(1,new_pw);
             prepState.setString(2,admin.getUsername());
             result = prepState.executeUpdate();
-
-
         } catch (SQLException sqlE){
             sqlE.printStackTrace();
         }
