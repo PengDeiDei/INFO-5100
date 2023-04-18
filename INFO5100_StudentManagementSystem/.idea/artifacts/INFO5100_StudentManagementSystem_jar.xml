@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="INFO5100_StudentManagementSystem:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/INFO5100_StudentManagementSystem_jar</output-path>
+    <root id="archive" name="INFO5100_StudentManagementSystem.jar">
+      <element id="module-output" name="INFO5100_StudentManagementSystem" />
+      <element id="extracted-dir" path="D:/sqljdbc_12.2/chs/mssql-jdbc-12.2.0.jre11.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

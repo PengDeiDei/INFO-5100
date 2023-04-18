@@ -1,13 +1,17 @@
 package edu.haon.view;
 
 import edu.haon.dao.AdminDao;
+import edu.haon.dao.CourseDao;
 import edu.haon.dao.StudentDao;
 import edu.haon.model.Admin;
+import edu.haon.model.Course;
 import edu.haon.model.Student;
 import edu.haon.util.StringUtil;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.Vector;
 
@@ -17,16 +21,12 @@ public class AdminFrame extends JFrame{
     private JTabbedPane main_tp;
     private JPanel student_p;
     private JPanel course_p;
-    private JPanel self_p;
-    private JTabbedPane self_tp;
     private JPanel password_p;
     private JTabbedPane student_tp;
     private JPanel listStu_p;
     private JPanel addStu_p;
     private JTabbedPane course_tp;
-    private JPanel listCourse_p;
     private JPanel addCourse_p;
-    private JPanel editCourse_p;
     private JLabel curr_pw_lb;
     private JPasswordField curr_password_pf;
     private JLabel new_pw_lb;
@@ -54,6 +54,30 @@ public class AdminFrame extends JFrame{
     private JLabel stu_major_lb3;
     private JTextField stu_name_tf3;
     private JTextField stu_major_tf3;
+    private JLabel coursename_lb1;
+    private JLabel instructor_lb;
+    private JTextField coursename_tf1;
+    private JTextField instructor_tf1;
+    private JLabel capacity_lb;
+    private JTextField capacity_tf1;
+    private JButton course_add_b;
+    private JButton course_clear_b;
+    private JPanel listCourse_p;
+    private JButton course_search_b;
+    private JTextField coursename_tf2;
+    private JTextField instructor_tf2;
+    private JTable course_list_tbl;
+    private JLabel coursename_lb2;
+    private JLabel instructor_lb2;
+    private JButton course_delete_b;
+    private JLabel coursename_lb3;
+    private JTextField coursename_tf3;
+    private JLabel instructor_lb3;
+    private JTextField instructor_tf3;
+    private JButton course_edit_b;
+    private JScrollPane course_list_sp;
+    private JLabel capacity_lb2;
+    private JTextField capacity_tf2;
 
     public AdminFrame(Admin admin){
         this.admin = admin;
@@ -68,8 +92,8 @@ public class AdminFrame extends JFrame{
         // Change Password button
         password_b1.addActionListener(e-> {
             String curr_pw = new String(curr_password_pf.getPassword());
-            String new_pw = new_password_tf.getText().toString();
-            String confirm_pw = confirm_pw_tf.getText().toString();
+            String new_pw = new_password_tf.getText();
+            String confirm_pw = confirm_pw_tf.getText();
 
             // pop message if current password is not entered
             if(StringUtil.isEmpty(curr_pw)){
@@ -129,8 +153,8 @@ public class AdminFrame extends JFrame{
         // Add Student Panel:
         // Add new student button
         stu_add_b.addActionListener(e->{
-            String stu_name = stu_name_tf1.getText().toString();
-            String stu_major = stu_major_tf.getText().toString();
+            String stu_name = stu_name_tf1.getText();
+            String stu_major = stu_major_tf.getText();
 
             if(StringUtil.isEmpty(stu_name)){
                 JOptionPane.showMessageDialog(contentPanel, "Please enter student name.");
@@ -169,8 +193,8 @@ public class AdminFrame extends JFrame{
         // Student List Panel:
         // list students by searching name and major
         stu_search_b.addActionListener(e -> {
-            String stu_name = stu_name_tf2.getText().toString();
-            String stu_major = stu_major_tf2.getText().toString();
+            String stu_name = stu_name_tf2.getText();
+            String stu_major = stu_major_tf2.getText();
 
             Student stu = new Student();
             stu.setName(stu_name);
@@ -214,8 +238,8 @@ public class AdminFrame extends JFrame{
 
             // get studentId, new name and new major
             String stu_id = stu_list_tbl.getValueAt(row,0).toString();
-            String new_name = stu_name_tf3.getText().toString();
-            String new_major = stu_major_tf3.getText().toString();
+            String new_name = stu_name_tf3.getText();
+            String new_major = stu_major_tf3.getText();
 
             // if both text fields are empty, pop message to ask user for inputs
             if(StringUtil.isEmpty(new_name) && StringUtil.isEmpty(new_major)){
@@ -234,8 +258,120 @@ public class AdminFrame extends JFrame{
 
             // refresh table no matter the student is edited or not
             setTable(new Student());
+        });
 
-            sd.closeDao();
+    // Course Management Panel:
+        // Add New Course Panel:
+        // Add button to add new course
+        course_add_b.addActionListener(e-> {
+            String c_name = coursename_tf1.getText();
+            String c_ins = instructor_tf1.getText();
+            String c_cap = capacity_tf1.getText();
+
+            if(StringUtil.isEmpty(c_name)){
+                JOptionPane.showMessageDialog(contentPanel, "Please enter course name.");
+                return;
+            }
+            if(StringUtil.isEmpty(c_ins)){
+                JOptionPane.showMessageDialog(contentPanel, "Please enter course instructor.");
+                return;
+            }
+            if(StringUtil.isEmpty(c_cap)){
+                JOptionPane.showMessageDialog(contentPanel, "Please enter course capacity.");
+                return;
+            }
+
+            // create new Course object
+            Course course  = new Course();
+            course.setName(c_name); course.setInstructor(c_ins);
+            course.setCapacity(Integer.parseInt(c_cap));
+
+            CourseDao cd = new CourseDao();
+            int result = cd.addCourse(course);
+
+            if(result >0){
+                JOptionPane.showMessageDialog(contentPanel, "Add new course successfully!");
+            }else{
+                JOptionPane.showMessageDialog(contentPanel,"Unable to add this course!");
+            }
+        });
+
+        // Clear button to clear entered information
+        course_clear_b.addActionListener(e-> {
+            coursename_tf1.setText("");
+            instructor_tf1.setText("");
+            capacity_tf1.setText("");
+        });
+
+        // Course List Panel:
+        // Search button to search course by course name and instructor
+        course_search_b.addActionListener(e->{
+            String course_name = coursename_tf2.getText();
+            String instructor = instructor_tf2.getText();
+
+            Course c = new Course();
+            c.setName(course_name);
+            c.setInstructor(instructor);
+
+            setTable(c);
+        });
+
+        // Delete button to delete selected course
+        course_delete_b.addActionListener(e->{
+            int row = course_list_tbl.getSelectedRow();
+
+            if(row == -1){
+                JOptionPane.showMessageDialog(contentPanel,"Please select the row to delete.");
+                return;
+            }
+
+            String name = course_list_tbl.getValueAt(row,1).toString();
+
+            CourseDao cd = new CourseDao();
+            int result = cd.deleteCourse(name);
+
+            if(result >0){
+                JOptionPane.showMessageDialog(contentPanel,"Delete successfully.");
+            }else{
+                JOptionPane.showMessageDialog(contentPanel,"Unable to delete.");
+            }
+
+            // refresh table no matter the student is deleted or not
+            setTable(new Course());
+        });
+
+        // Edit button to edit selected course
+        course_edit_b.addActionListener(e->{
+            int row = course_list_tbl.getSelectedRow();
+
+            if(row == -1){
+                JOptionPane.showMessageDialog(contentPanel,"Please select the row to delete.");
+                return;
+            }
+
+            // get courseId, new name and new instructor
+            String course_id = course_list_tbl.getValueAt(row,0).toString();
+            String new_name = coursename_tf3.getText();
+            String new_ins = instructor_tf3.getText();
+            String new_cap = capacity_tf2.getText();
+
+            // if both text fields are empty, pop message to ask user for inputs
+            if(StringUtil.isEmpty(new_name) && StringUtil.isEmpty(new_ins) && StringUtil.isEmpty(new_cap)){
+                JOptionPane.showMessageDialog(contentPanel,"Please enter the information you want edit.");
+                return;
+            }
+
+            CourseDao cd = new CourseDao();
+            int result = cd.editCourse(course_id, new_name, new_ins,new_cap);
+
+            if(result >0){
+                JOptionPane.showMessageDialog(contentPanel,"Edit successfully.");
+            }else{
+                JOptionPane.showMessageDialog(contentPanel,"Unable to edit.");
+            }
+
+            // refresh table no matter the student is edited or not
+            setTable(new Course());
         });
     }
 
@@ -286,4 +422,23 @@ public class AdminFrame extends JFrame{
         sd.closeDao();
     }
 
+
+    private void setTable(Course course){
+        CourseDao cd = new CourseDao();
+        List<Course> courseList = cd.getCourseList(course);
+
+        DefaultTableModel dtm = new DefaultTableModel(null, new String[]{"Course Id","Course Name","Instructor", "Capacity"});
+        course_list_tbl.setModel(dtm);
+
+        for(Course c: courseList){
+            Vector v = new Vector();
+            v.add(c.getCourseId());
+            v.add(c.getName());
+            v.add(c.getInstructor());
+            v.add(c.getCapacity());
+            dtm.addRow(v);
+        }
+
+        cd.closeDao();
+    }
 }

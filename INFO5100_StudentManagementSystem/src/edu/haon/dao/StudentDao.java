@@ -1,6 +1,5 @@
 package edu.haon.dao;
 
-import edu.haon.model.Admin;
 import edu.haon.model.Student;
 import edu.haon.util.StringUtil;
 
@@ -85,6 +84,14 @@ public class StudentDao extends BaseDao{
         return result;
     }
 
+    /*
+     *  @brief: method to add student to database by taking
+     *  the input Student object, return the result of insertion
+     *
+     *  @param: student Student
+     *
+     *  @return: result int
+     */
     public int addStudent(Student student){
         int result = 0;
 
@@ -182,17 +189,17 @@ public class StudentDao extends BaseDao{
         int result = 0;
         String sql = "UPDATE Students";
         if(!StringUtil.isEmpty(new_name)){
-            sql += " AND StudentName = '"+new_name+"'";
+            sql += " , StudentName = '"+new_name+"'";
         }
 
         if(!StringUtil.isEmpty(new_major)){
-            sql += " AND StudentMajor = '"+new_major+"'";
+            sql += " , StudentMajor = '"+new_major+"'";
         }
 
         sql += " WHERE StudentId = ?";
 
         try {
-            sql = sql.toString().replaceFirst("AND","SET");
+            sql = sql.toString().replaceFirst(",","SET");
             PreparedStatement prepState = conn.prepareStatement(sql);
             prepState.setString(1,stu_id);
             result = prepState.executeUpdate();

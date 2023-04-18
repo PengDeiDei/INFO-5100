@@ -1,7 +1,9 @@
 package edu.haon.view;
 
 import edu.haon.dao.AdminDao;
+import edu.haon.dao.StudentDao;
 import edu.haon.model.Admin;
+import edu.haon.model.Student;
 import edu.haon.util.StringUtil;
 
 import javax.swing.*;
@@ -45,11 +47,12 @@ public class LoginFrame extends JFrame{
                 return;
             }
 
-            // login as admin
             Admin admin = null;
+            Student student = null;
+
+            // login as admin
             if(userType == 0){
                 AdminDao ad = new AdminDao();
-
                 Admin tempAdmin = new Admin();
                 tempAdmin.setUsername(username);
                 tempAdmin.setPassword(password);
@@ -69,6 +72,24 @@ public class LoginFrame extends JFrame{
                 new AdminFrame(admin);
             }else{
                 // login as student
+                StudentDao sd = new StudentDao();
+                Student tempStu = new Student();
+                tempStu.setUsername(username);
+                tempStu.setPassword(password);
+
+                student = sd.login(tempStu);
+
+                if(student == null){
+                    JOptionPane.showMessageDialog(contentPanel,"Username or password is wrong!");
+                    return;
+                }
+
+                // pop message to show login successfully
+                JOptionPane.showMessageDialog(contentPanel,"Welcome, Student: "+student.getName()+"!");
+                // close login frame
+                this.dispose();
+                // create and move to admin frame
+                new StudentFrame(student);
             }
         });
 
@@ -85,9 +106,5 @@ public class LoginFrame extends JFrame{
                 userType_cb.setSelectedIndex(0);
 
         });
-    }
-
-    public static void main(String[] args){
-        LoginFrame myLog = new LoginFrame();
     }
 }

@@ -1,7 +1,6 @@
 package edu.haon.dao;
 
 import edu.haon.model.Admin;
-import edu.haon.model.Student;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
